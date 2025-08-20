@@ -10,18 +10,22 @@ from sklearn.metrics import classification_report
 caricamento dei dati
 """
 data = pd.read_csv('EKPC_hourly.csv')
-data['Datetime'] = pd.to_datetime(data['Datetime'])
+data['Datetime'] = pd.to_datetime(data['Datetime']) 
 
 """
 calcolo della media giornaliera
 """
 daily_avg = data.resample('D', on='Datetime').mean()
+weekly_avg = data.resample('W', on='Datetime').mean()
+
 
 """Merge della media giornaliera sui dati orari"""
 data = data.merge(daily_avg, on='Datetime', suffixes=('', '_Daily_Avg'))
+data = data.merge(weekly_avg, on='Datetime', suffixes=('', '_Weekly_Avg'))
 
 "Creazione della classe: 1 = alto consumo, 0 = basso consumo"
-data['Consumption_Class'] = data['EKPC_MW'].apply(lambda x: 1 if x > data['EKPC_MW_Daily_Avg'].mean() else 0)
+data['Consumption_Class_Daily'] = data['EKPC_MW'].apply(lambda x: 1 if x > data['EKPC_MW_Daily_Avg'].mean() else 0)
+data['Consumption_Class_Weekly'] = data['EKPC_MW'].apply(lambda x: 1 if x > data['EKPC_MW_Weekly_Avg'].mean() else 0)
 
 """# Definizione feature e label"""
 X = data[['EKPC_MW', 'EKPC_MW_Daily_Avg']]
